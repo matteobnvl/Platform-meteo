@@ -1,4 +1,4 @@
-# Platforme-meteo
+# Platform Météo
 
 
 ## Chargement des données
