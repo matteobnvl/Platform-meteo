@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: meteo_postgres_dev
+    environment:
+      POSTGRES_USER: meteo_user
+      POSTGRES_PASSWORD: meteo_password
+      POSTGRES_DB: meteo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meteo_user -d meteo_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: ./cmd/api/Dockerfile
+      target: builder
+    container_name: meteo_api_dev
+    command: air -c .air.api.toml
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://meteo_user:meteo_password@postgres:5432/meteo_db?sslmode=disable
+      - ENVIRONMENT=development
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ingester:
+    build:
+      context: .
+      dockerfile: ./cmd/ingester/Dockerfile
+      target: builder
+    container_name: meteo_ingester_dev
+    command: air -c .air.ingester.toml
+    environment:
+      - DATABASE_URL=postgres://meteo_user:meteo_password@postgres:5432/meteo_db?sslmode=disable
+      - ENVIRONMENT=development
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data_dev:
