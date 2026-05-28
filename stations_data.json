@@ -1,0 +1,277 @@
+{
+  "stations": [
+    {
+      "id": "FR-BOR-001",
+      "name": "Bordeaux Mérignac",
+      "country": "France",
+      "location": {
+        "latitude": 44.8333,
+        "longitude": -0.7
+      }
+    },
+    {
+      "id": "FR-PAR-002",
+      "name": "Paris Montsouris",
+      "country": "France",
+      "location": {
+        "latitude": 48.8214,
+        "longitude": 2.3375
+      }
+    },
+    {
+      "id": "FR-LYO-003",
+      "name": "Lyon Bron",
+      "country": "France",
+      "location": {
+        "latitude": 45.7264,
+        "longitude": 4.9416
+      }
+    },
+    {
+      "id": "FR-MAR-004",
+      "name": "Marseille Marignane",
+      "country": "France",
+      "location": {
+        "latitude": 43.45,
+        "longitude": 5.2333
+      }
+    },
+    {
+      "id": "FR-TOU-005",
+      "name": "Toulouse Blagnac",
+      "country": "France",
+      "location": {
+        "latitude": 43.6294,
+        "longitude": 1.3638
+      }
+    },
+    {
+      "id": "FR-STR-006",
+      "name": "Strasbourg Entzheim",
+      "country": "France",
+      "location": {
+        "latitude": 48.55,
+        "longitude": 7.6333
+      }
+    },
+    {
+      "id": "FR-NAN-007",
+      "name": "Nantes Bouguenais",
+      "country": "France",
+      "location": {
+        "latitude": 47.15,
+        "longitude": -1.6166
+      }
+    },
+    {
+      "id": "FR-LIL-008",
+      "name": "Lille Lesquin",
+      "country": "France",
+      "location": {
+        "latitude": 50.5666,
+        "longitude": 3.1
+      }
+    },
+    {
+      "id": "ES-MAD-009",
+      "name": "Madrid Barajas",
+      "country": "Espagne",
+      "location": {
+        "latitude": 40.4719,
+        "longitude": 3.5626
+      }
+    },
+    {
+      "id": "ES-BAR-010",
+      "name": "Barcelona El Prat",
+      "country": "Espagne",
+      "location": {
+        "latitude": 41.2974,
+        "longitude": 2.0833
+      }
+    },
+    {
+      "id": "ES-SEV-011",
+      "name": "Sevilla San Pablo",
+      "country": "Espagne",
+      "location": {
+        "latitude": 37.418,
+        "longitude": -5.8931
+      }
+    },
+    {
+      "id": "PT-LIS-012",
+      "name": "Lisboa Portela",
+      "country": "Portugal",
+      "location": {
+        "latitude": 38.7813,
+        "longitude": -9.1359
+      }
+    },
+    {
+      "id": "PT-POR-013",
+      "name": "Porto Pedras Rubras",
+      "country": "Portugal",
+      "location": {
+        "latitude": 41.2481,
+        "longitude": -8.6814
+      }
+    },
+    {
+      "id": "IT-ROM-014",
+      "name": "Roma Fiumicino",
+      "country": "Italie",
+      "location": {
+        "latitude": 41.8003,
+        "longitude": 12.2389
+      }
+    },
+    {
+      "id": "IT-MIL-015",
+      "name": "Milano Malpensa",
+      "country": "Italie",
+      "location": {
+        "latitude": 45.6306,
+        "longitude": 8.7281
+      }
+    },
+    {
+      "id": "IT-NAP-016",
+      "name": "Napoli Capodichino",
+      "country": "Italie",
+      "location": {
+        "latitude": 40.886,
+        "longitude": 14.2908
+      }
+    },
+    {
+      "id": "DE-BER-017",
+      "name": "Berlin Tegel",
+      "country": "Allemagne",
+      "location": {
+        "latitude": 52.5597,
+        "longitude": 13.2877
+      }
+    },
+    {
+      "id": "DE-MÜN-018",
+      "name": "München Riem",
+      "country": "Allemagne",
+      "location": {
+        "latitude": 48.3538,
+        "longitude": 11.7861
+      }
+    },
+    {
+      "id": "DE-HAM-019",
+      "name": "Hamburg Fuhlsbüttel",
+      "country": "Allemagne",
+      "location": {
+        "latitude": 53.6303,
+        "longitude": 9.9883
+      }
+    },
+    {
+      "id": "DE-FRA-020",
+      "name": "Frankfurt Flughafen",
+      "country": "Allemagne",
+      "altitude_m": 111,
+      "location": {
+        "latitude": 50.0379,
+        "longitude": 8.5622
+      }
+    },
+    {
+      "id": "BE-BRU-021",
+      "name": "Bruxelles Zaventem",
+      "country": "Belgique",
+      "altitude_m": 56,
+      "location": {
+        "latitude": 50.9014,
+        "longitude": 4.4844
+      }
+    },
+    {
+      "id": "NL-AMS-022",
+      "name": "Amsterdam Schiphol",
+      "country": "Pays-Bas",
+      "location": {
+        "latitude": 52.3086,
+        "longitude": 4.7639
+      }
+    },
+    {
+      "id": "AT-WIE-023",
+      "name": "Wien Schwechat",
+      "country": "Autriche",
+      "location": {
+        "latitude": 48.1102,
+        "longitude": 16.5697
+      }
+    },
+    {
+      "id": "CH-ZÜR-024",
+      "name": "Zürich Kloten",
+      "country": "Suisse",
+      "location": {
+        "latitude": 47.4647,
+        "longitude": 8.5492
+      }
+    },
+    {
+      "id": "CH-GEN-025",
+      "name": "Genève Cointrin",
+      "country": "Suisse",
+      "location": {
+        "latitude": 46.2381,
+        "longitude": 6.1089
+      }
+    },
+    {
+      "id": "DK-KØB-026",
+      "name": "København Kastrup",
+      "country": "Danemark",
+      "location": {
+        "latitude": 55.618,
+        "longitude": 12.6561
+      }
+    },
+    {
+      "id": "SE-STO-027",
+      "name": "Stockholm Arlanda",
+      "country": "Suède",
+      "altitude_m": 137,
+      "location": {
+        "latitude": 59.6519,
+        "longitude": 17.9186
+      }
+    },
+    {
+      "id": "NO-OSL-028",
+      "name": "Oslo Gardermoen",
+      "country": "Norvège",
+      "location": {
+        "latitude": 60.1939,
+        "longitude": 11.1004
+      }
+    },
+    {
+      "id": "PL-WAR-029",
+      "name": "Warszawa Okęcie",
+      "country": "Pologne",
+      "location": {
+        "latitude": 52.1657,
+        "longitude": 20.9671
+      }
+    },
+    {
+      "id": "CZ-PRA-030",
+      "name": "Praha Ruzyně",
+      "country": "Tchéquie",
+      "location": {
+        "latitude": 50.1008,
+        "longitude": 14.2632
+      }
+    }
+  ]
+}
