@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     container_name: meteo_postgres_dev
     environment:
-      POSTGRES_USER: meteo_user
-      POSTGRES_PASSWORD: meteo_password
-      POSTGRES_DB: meteo_db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
     ports:
       - "5432:5432"
     volumes:

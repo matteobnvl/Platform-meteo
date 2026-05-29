@@ -1,5 +1,13 @@
 # PLatform M&t&o
 
+## Installation
+
+Faire `cp .env.example .env` pui remplir les variables d'environnement
+
+Et lancer `make up` dans un terminal.
+
+Les applications vont se lancer automatiquement.
+
 ## Système de migrations
 
 ### Fonctionnement
