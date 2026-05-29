@@ -29,3 +29,6 @@ Data json a ingest, champ à garder et leur correspondance :
 | rr12          | précipitations sur les 12 dernière heure en | mm                                |
 | rr24          | précipitations sur les 24 dernière heure en | mm                                |
 
+
+Schema de bdd :
+![Schema de bdd](./assets/bdd_schema.png)
