@@ -12,11 +12,7 @@ CREATE TABLE observations (
     temperature      FLOAT,
     wind_speed       FLOAT,
     wind_direction   FLOAT,
-    precipitation1   FLOAT,
-    precipitation3   FLOAT,
-    precipitation6   FLOAT,
-    precipitation12  FLOAT,
-    precipitation24  FLOAT
+    precipitation   FLOAT
 );
 
 CREATE TABLE events (

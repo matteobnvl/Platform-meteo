@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	db := db.InitDB(false)
+	db := db.InitDB(true)
 	defer db.Close()
 
-	fetcher.Run(db)
+	fetcher.FetchSynop(db)
 }

@@ -11,17 +11,13 @@ type Station struct {
 }
 
 type Observation struct {
-	Id              int
-	StationId       string
-	ObservedAt      time.Time
-	Temperature     *float64
-	WindSpeed       *float64
-	WindDirection   *float64
-	Precipitation1  *float64
-	Precipitation3  *float64
-	Precipitation6  *float64
-	Precipitation12 *float64
-	Precipitation24 *float64
+	Id            int
+	StationId     string
+	ObservedAt    time.Time
+	Temperature   float64
+	WindSpeed     float64
+	WindDirection float64
+	Precipitation float64
 }
 
 type Event struct {
