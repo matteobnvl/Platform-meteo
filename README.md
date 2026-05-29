@@ -19,15 +19,15 @@ Ici, on vient appeler l'API de l'open-meteo avec les coordonnées de Bordeaux M�
 
 Tableau des query utilisées :
 
-| Paramètre        | Valeur dans ton URL                                       | Utilité et Description                                                                                                                                                                                                                                                             |
-|:-----------------|:----------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`latitude`**   | `44.8333`                                                 | **Coordonnée Nord/Sud** du point géographique. Ici, cela correspond à la latitude de Bordeaux Mérignac.                                                                                                                                                                            |
-| **`longitude`**  | `-0.7`                                                    | **Coordonnée Est/Ouest** du point géographique. Le signe moins `-` indique qu'on est à l'Ouest du méridien de Greenwich (Bordeaux).                                                                                                                                                |
-| **`start_date`** | `2026-04-01`                                              | **Date de début** de la plage de données souhaitée (au format `AAAA-MM-JJ`).                                                                                                                                                                                                       |
-| **`end_date`**   | `2026-05-01`                                              | **Date de fin** de la plage de données souhaitée (au format `AAAA-MM-JJ`). Associé à `start_date`, cela définit une fenêtre de 30 jours.                                                                                                                                           |
-| **`hourly`**     | `temperature_2m,`<br>`wind_gusts_10m,`<br>`precipitation` | **Variables météo demandées heure par heure** :<br>• `temperature_2m` : Température à 2m (canicules/vagues de froid).<br>• `wind_gusts_10m` : Rafales de vent à 10m (tempêtes).<br>• `precipitation` : Cumul de pluie en mm (inondations/sécheresses).                             |
-| **`timezone`**   | `auto`                                                    | **Gestion du fuseau horaire**. L'option `auto` demande à Open-Meteo de caler automatiquement les heures du JSON sur le fuseau de la coordonnée demandée (ex: `Europe/Paris` pour Bordeaux), évitant ainsi les décalages liés aux heures d'été/hiver lors du parsing en Go.         |
-
+| Paramètre           | Valeur dans ton URL                                       | Utilité et Description                                                                                                                                                                                                                                                     |
+|:--------------------|:----------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`latitude`**      | `44.8333`                                                 | **Coordonnée Nord/Sud** du point géographique. Ici, cela correspond à la latitude de Bordeaux Mérignac.                                                                                                                                                                    |
+| **`longitude`**     | `-0.7`                                                    | **Coordonnée Est/Ouest** du point géographique. Le signe moins `-` indique qu'on est à l'Ouest du méridien de Greenwich (Bordeaux).                                                                                                                                        |
+| **`start_date`**    | `2026-04-01`                                              | **Date de début** de la plage de données souhaitée (au format `AAAA-MM-JJ`).                                                                                                                                                                                               |
+| **`end_date`**      | `2026-05-01`                                              | **Date de fin** de la plage de données souhaitée (au format `AAAA-MM-JJ`). Associé à `start_date`, cela définit une fenêtre de 30 jours.                                                                                                                                   |
+| **`hourly`**        | `temperature_2m,`<br>`wind_gusts_10m,`<br>`precipitation` | **Variables météo demandées heure par heure** :<br>• `temperature_2m` : Température à 2m (canicules/vagues de froid).<br>• `wind_gusts_10m` : Rafales de vent à 10m (tempêtes).<br>• `precipitation` : Cumul de pluie en mm (inondations/sécheresses).                     |
+| **`timezone`**      | `auto`                                                    | **Gestion du fuseau horaire**. L'option `auto` demande à Open-Meteo de caler automatiquement les heures du JSON sur le fuseau de la coordonnée demandée (ex: `Europe/Paris` pour Bordeaux), évitant ainsi les décalages liés aux heures d'été/hiver lors du parsing en Go. |
+| **`forecast_days`** | `16`                                                      | **Permet de récupérer des prévisions de 15 jours**.                                                                                                                                                                                                                        |
 
 Nous récupérons un format comme ceci :
 
@@ -65,3 +65,14 @@ Nous récupérons un format comme ceci :
 | `hourly`                      | `Object`         | `{ ... }`                   | **Le bloc de données temporelles (Slices synchronisées).**    |
 | `hourly.time`                 | `Array [String]` | `["2026-05-28T00:00", ...]` | Liste ordonnée de tous les timestamps (heure par heure).      |
 | `hourly.temperature_2m`       | `Array [Float]`  | `[22, 20.8, 19.7, ...]`     | Liste ordonnée des températures correspondant à chaque heure. |
+
+## Données qui nous intéressent
+
+1. Température => `https://api.open-meteo.com/v1/forecast?latitude=44.8333&longitude=-0.7&hourly=temperature_2m&timezone=auto` 
+2. Précipitation => `https://api.open-meteo.com/v1/forecast?latitude=44.8333&longitude=-0.7&hourly=precipitation&timezone=auto`
+3. Vent => `https://api.open-meteo.com/v1/forecast?latitude=44.8333&longitude=-0.7&hourly=wind_gusts_10m&timezone=auto`
+4. Pullution => `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=50.6292&longitude=3.0573&hourly=pm2_5&timezone=auto`
+
+Pour récupérer les métrics de pollutions, nous devons utiliser une nouvelle route API : `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=44.8333&longitude=-0.7&hourly=pm2_5&timezone=auto`
+Comme pour la précédente, les paramètres `start_date` et `end_date` nous permettent de remonter dans le temps pour récupérer l'historique qu'on souhaite.
+La doc : https://open-meteo.com/en/docs/air-quality-api
