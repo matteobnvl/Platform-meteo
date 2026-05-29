@@ -2,7 +2,8 @@ package db
 
 import (
 	"database/sql"
-	"log"
+
+	_ "github.com/lib/pq"
 )
 
 func Connect() (*sql.DB, error) {
@@ -10,12 +11,11 @@ func Connect() (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	defer db.Close()
 
 	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return db, err
 }

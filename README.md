@@ -1,35 +1,31 @@
-# Platform Météo
+# PLatform M&t&o
 
-| Route | Champs retournés |
-|---|---|
-| GET /station/infrahoraire-6m | Id_station;Date;Latitude;Longitude;Nom;Parametres_observation;Valeurs_mesurees |
-| GET /station/horaire | Id_station;Date;Latitude;Longitude;Nom;Parametres_observation;Valeurs_mesurees |
-| GET /liste-stations | Id_station;Id_omm;Nom_usuel;Latitude;Longitude;Altitude;Date_ouverture;Pack |
-| GET /liste-stations-synop | Id_station;Nom;Latitude;Longitude;Altitude |
-| GET /synop | Id_station;Date;Pression;Temperature;Humidite;Direction_vent;Vitesse_vent;Nebulosite;Visibilite;Precipitations |
-| GET /liste-bouees | Id_bouee;Nom;Latitude;Longitude;Altitude;Date_ouverture |
-| GET /bouees | Id_bouee;Date;Temperature_air;Temperature_eau;Pression;Vitesse_vent;Direction_vent;Hauteur_vagues |
+## Système de migrations
 
+### Fonctionnement
+Le projet contient un système de migrations maison, présent dans le dossier `db/migrations/`.
+Un fichier `migration.go` :
+- crée la table de migrations si elle n'existe pas
+  - récupère tous les fichiers de migration présent dans le dossier
+  - vérifie si la table de migrations existe
+  - si elle n'existe pas, elle exécute le code dans le fichier et insère en base la migration
 
-Data json a ingest, champ à garder et leur correspondance : 
+### Créer une migration
 
-| Json Key      | Correspondance en fr                        | Unité                             |
-|---------------|---------------------------------------------|-----------------------------------|
-| lat           | latitude                                    | degré                             |
-| long          | longitude                                   | degré                             |
-| name          | nom de la ville                             |                                   |
-| validity_time | date et heure de la mesure                  | ISO 8601/UTC AAAA-MM-DDTHH:MM:SSZ |
-| geo_id_wmo    | id de la ville                              |                                   |
-| t             | température en Kelvin                       | Kelvin                            |
-| ff            | vitesse du vent moyen en mettre par seconde | m/s                               |
-| dd            | direction du bent                           | degré                             |
-| rr1           | précipitations sur la dernière heure en     | mm                                |
-| rr3           | précipitations sur les 3 dernière heure en  | mm                                |
-| rr6           | précipitations sur les 6 dernière heure en  | mm                                |
-| rr12          | précipitations sur les 12 dernière heure en | mm                                |
-| rr24          | précipitations sur les 24 dernière heure en | mm                                |
+Créer un fichier dans `db/migrations/` en suivant le nommage :
+```text
+0001_init.sql
+0002_example.sql
+```
 
+Attention de bien respecter le suivi des nombres pour ne pas casser les migrations (un sort est effectué sur ces chiffres).
 
+Dans le fichier, écrire le code sql qui doit être exécuté.
 
-Schema de bdd :
-![Schema de bdd](./assets/bdd_schema.png)
+Automatiquement le fichier sera lu, les migrations sont exécuté à chaque boot du binaire (dans `cmd/api/main.go`)
+
+### Règles importantes
+
+1. Ne jamais modifier un fichier existant, toujours en créer un nouveau
+2. Ne jamais sauter de numéro
+3. Un fichier = une modification précise
