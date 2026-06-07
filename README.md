@@ -1,39 +1,32 @@
-# PLatform M&t&o
+# Platform Météo
+
+Une plateforme de traitement et d'exposition des données météorologiques de Météo-France (Data.gouv.fr).
+
+## 📖 Documentation interne
+
+Une documentation détaillée de l'architecture et du fonctionnement interne du projet est disponible dans le dossier [**`/docs`**](./docs/README.md) :
+- 📥 **[Ingestion des Données](./docs/ingestion.md)** : Flux d'extraction, de transformation et d'écriture par lots (batching) des stations et des observations.
+- 🗄️ **[Schéma de la Base de Données](./docs/database.md)** : Tables SQL, clés, index/contraintes et correspondance avec les modèles structurés Go.
+- ⚙️ **[Système de Migrations](./docs/migrations.md)** : Fonctionnement détaillé du runner de migration Go maison.
+- 🌐 **[Flux Data.gouv.fr](./docs/data_gouv.md)** : Liste des flux Météo-France, clés API et correspondances d'unités (Kelvin, Celsius, m/s, km/h).
+
+---
 
 ## Installation
 
-Faire `cp .env.example .env` pui remplir les variables d'environnement
+Faire `cp .env.example .env` puis remplir les variables d'environnement.
 
-Et lancer `make up` dans un terminal.
+Et lancer dans un terminal :
+```bash
+make up
+```
 
-Les applications vont se lancer automatiquement.
+Les applications vont se lancer automatiquement via Docker Compose.
+
+---
 
 ## Système de migrations
 
-### Fonctionnement
-Le projet contient un système de migrations maison, présent dans le dossier `db/migrations/`.
-Un fichier `migration.go` :
-- crée la table de migrations si elle n'existe pas
-  - récupère tous les fichiers de migration présent dans le dossier
-  - vérifie si la table de migrations existe
-  - si elle n'existe pas, elle exécute le code dans le fichier et insère en base la migration
+Le projet intègre un système de migrations SQL personnalisé situé dans le dossier [`db/migrations/`](./db/migrations/).
 
-### Créer une migration
-
-Créer un fichier dans `db/migrations/` en suivant le nommage :
-```text
-0001_init.sql
-0002_example.sql
-```
-
-Attention de bien respecter le suivi des nombres pour ne pas casser les migrations (un sort est effectué sur ces chiffres).
-
-Dans le fichier, écrire le code sql qui doit être exécuté.
-
-Automatiquement le fichier sera lu, les migrations sont exécuté à chaque boot du binaire (dans `cmd/api/main.go`)
-
-### Règles importantes
-
-1. Ne jamais modifier un fichier existant, toujours en créer un nouveau
-2. Ne jamais sauter de numéro
-3. Un fichier = une modification précise
+Pour comprendre son fonctionnement interne ou savoir comment créer une nouvelle migration étape par étape, veuillez vous référer à la **[documentation du système de migrations](./docs/migrations.md)**.

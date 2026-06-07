@@ -1,0 +1,1 @@
+ALTER TABLE observations ADD CONSTRAINT unique_observation UNIQUE (station_id, observed_at);
