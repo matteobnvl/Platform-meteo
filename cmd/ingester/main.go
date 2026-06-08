@@ -8,5 +8,5 @@ func main() {
 	db := db.InitDB(true)
 	defer db.Close()
 
-	// fetcher.FetchSynop(db)
+	//fetcher.FetchSynop(db)
 }
