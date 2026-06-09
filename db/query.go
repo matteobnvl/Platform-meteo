@@ -89,3 +89,30 @@ func DeleteStation(db *sql.DB, id string) error {
 	_, err := db.Exec(`DELETE FROM stations WHERE id=$1`, id)
 	return err
 }
+
+func GetDailyAggregate(db *sql.DB, stationID string) ([]model.AggregateResult, error) {
+	rows, err := db.Query(`
+        SELECT
+            DATE(observed_at)::text,
+            ROUND(AVG(temperature)::numeric, 2),
+            ROUND(MAX(temperature)::numeric, 2),
+            ROUND(MIN(temperature)::numeric, 2)
+        FROM observations
+        WHERE station_id = $1
+        GROUP BY DATE(observed_at)
+        ORDER BY DATE(observed_at) DESC
+    `, stationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var results []model.AggregateResult
+	for rows.Next() {
+		var r model.AggregateResult
+		if err := rows.Scan(&r.Period, &r.AvgTemp, &r.MaxTemp, &r.MinTemp); err != nil {
+			return nil, err
+		}
+		results = append(results, r)
+	}
+	return results, rows.Err()
+}

@@ -28,3 +28,10 @@ type Event struct {
 	EndedAt   *time.Time
 	Metadata  map[string]any
 }
+
+type AggregateResult struct {
+	Period  string  `json:"period"`
+	AvgTemp float64 `json:"avg_temperature"`
+	MaxTemp float64 `json:"max_temperature"`
+	MinTemp float64 `json:"min_temperature"`
+}
