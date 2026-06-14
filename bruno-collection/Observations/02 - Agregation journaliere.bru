@@ -1,0 +1,16 @@
+meta {
+  name: Agregation journaliere
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/observations/aggregate
+  body: none
+  auth: none
+}
+
+params:query {
+  period: daily
+  station_id: {{stationId}}
+}

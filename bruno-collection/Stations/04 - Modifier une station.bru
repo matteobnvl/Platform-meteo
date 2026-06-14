@@ -1,0 +1,21 @@
+meta {
+  name: Modifier une station
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/stations/99999
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "Id": "99999",
+    "Name": "Station Test Modifiee",
+    "Country": "FR",
+    "Latitude": 48.90,
+    "Longitude": 2.40
+  }
+}

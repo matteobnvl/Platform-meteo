@@ -1,0 +1,21 @@
+meta {
+  name: Creer une station
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/stations
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "Id": "99999",
+    "Name": "Station Test",
+    "Country": "FR",
+    "Latitude": 48.85,
+    "Longitude": 2.35
+  }
+}

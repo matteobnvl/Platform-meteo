@@ -1,0 +1,16 @@
+meta {
+  name: Statistiques des evenements
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/events/stats
+  body: none
+  auth: none
+}
+
+params:query {
+  ~type: heatwave
+  ~country: FR
+}
