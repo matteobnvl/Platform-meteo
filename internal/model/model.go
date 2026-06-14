@@ -26,7 +26,14 @@ type Event struct {
 	Type      string
 	StartedAt time.Time
 	EndedAt   *time.Time
+	Severity  string
 	Metadata  map[string]any
+}
+
+type EventStat struct {
+	Type    string
+	Country string
+	Count   int
 }
 
 type AggregateResult struct {
