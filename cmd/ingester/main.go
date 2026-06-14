@@ -31,7 +31,7 @@ func main() {
 
 	// détection toutes les 10 minutes
 	go func() {
-		ticker := time.NewTicker(10 * time.Minute)
+		ticker := time.NewTicker(time.Duration(cfg.IntervalMinutes) * time.Minute)
 		defer ticker.Stop()
 		for range ticker.C {
 			slog.Info("détection périodique démarrée")

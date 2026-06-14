@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/matteobnvl/Platform-meteo/db"
+	"github.com/matteobnvl/Platform-meteo/front"
 	"github.com/matteobnvl/Platform-meteo/internal/handler"
 )
 
@@ -26,6 +27,12 @@ func main() {
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok\n"))
+	})
+
+	// dashboard
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(front.IndexHTML)
 	})
 
 	// docs

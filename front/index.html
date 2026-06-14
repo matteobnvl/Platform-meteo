@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Platform Météo — Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      display: flex;
+      height: 100vh;
+      font-family: system-ui, sans-serif;
+      background: #f0f4f8;
+    }
+
+    #sidebar {
+      width: 340px;
+      min-width: 340px;
+      display: flex;
+      flex-direction: column;
+      background: #1e293b;
+      color: #e2e8f0;
+      overflow: hidden;
+    }
+
+    #sidebar h1 {
+      padding: 20px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-bottom: 1px solid #334155;
+      letter-spacing: 0.05em;
+    }
+
+    #filters {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #334155;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #475569;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+
+    .filter-btn.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+    }
+
+    #event-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .event-card {
+      background: #0f172a;
+      border-left: 4px solid #475569;
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .event-card:hover { background: #1e293b; }
+
+    .event-card.storm    { border-color: #3b82f6; }
+    .event-card.heatwave { border-color: #f97316; }
+    .event-card.cold_wave { border-color: #67e8f9; }
+    .event-card.flood    { border-color: #22c55e; }
+
+    .event-type {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+      opacity: 0.7;
+    }
+
+    .event-station { font-size: 0.85rem; font-weight: 600; }
+
+    .event-date {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .event-severity {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      margin-top: 4px;
+    }
+
+    .event-dates {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .event-meta {
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: #0a0f1a;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+    }
+
+    .meta-key { color: #94a3b8; }
+    .meta-val { color: #f1f5f9; font-weight: 600; }
+
+    #map { flex: 1; }
+
+    #status {
+      padding: 10px 16px;
+      font-size: 0.72rem;
+      color: #64748b;
+      border-top: 1px solid #334155;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h1>🌦 Platform Météo</h1>
+  <div id="filters">
+    <button class="filter-btn active" data-type="">Tous</button>
+    <button class="filter-btn storm" data-type="storm">Tempête</button>
+    <button class="filter-btn heatwave" data-type="heatwave">Canicule</button>
+    <button class="filter-btn cold_wave" data-type="cold_wave">Froid</button>
+    <button class="filter-btn flood" data-type="flood">Inondation</button>
+  </div>
+  <div id="event-list"></div>
+  <div id="status">Chargement…</div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([46.5, 2.5], 6)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map)
+
+  const TYPE_LABELS = {
+    storm: 'Tempête',
+    heatwave: 'Canicule',
+    cold_wave: 'Vague de froid',
+    flood: 'Inondation potentielle',
+  }
+
+  const TYPE_COLORS = {
+    storm: '#3b82f6',
+    heatwave: '#f97316',
+    cold_wave: '#67e8f9',
+    flood: '#22c55e',
+  }
+
+  let allEvents = []
+  let stations = {}
+  let markers = {}
+  let activeFilter = ''
+
+  function markerIcon(type) {
+    const color = TYPE_COLORS[type] || '#94a3b8'
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        width:14px;height:14px;
+        border-radius:50%;
+        background:${color};
+        border:2px solid white;
+        box-shadow:0 1px 4px rgba(0,0,0,.4)
+      "></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    })
+  }
+
+  const META_LABELS = {
+    max_wind_speed_kmh:   'Vent max',
+    duration_hours:       'Durée (h)',
+    duration_days:        'Durée (j)',
+    peak_temperature:     'Temp. max',
+    min_temperature:      'Temp. min',
+    total_precipitation_mm: 'Précipitations',
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString('fr-FR', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    })
+  }
+
+  function formatDateRange(startedAt, endedAt) {
+    const start = formatDate(startedAt)
+    const end = endedAt ? formatDate(endedAt) : 'en cours'
+    return `${start} → ${end}`
+  }
+
+  function formatMeta(metadata) {
+    if (!metadata) return ''
+    const rows = Object.entries(metadata)
+      .filter(([k]) => META_LABELS[k])
+      .map(([k, v]) => {
+        const val = typeof v === 'number' ? Math.round(v * 10) / 10 : v
+        return `<div style="display:flex;justify-content:space-between;font-size:0.72rem;margin-top:3px;">
+          <span style="color:#94a3b8;">${META_LABELS[k]}</span>
+          <span style="color:#f1f5f9;font-weight:600;">${val}</span>
+        </div>`
+      }).join('')
+    if (!rows) return ''
+    return `<div style="margin-top:8px;padding:6px 8px;background:#0a0f1a;border-radius:4px;">${rows}</div>`
+  }
+
+  function metaPopup(metadata) {
+    if (!metadata) return ''
+    return Object.entries(metadata)
+      .filter(([k]) => META_LABELS[k])
+      .map(([k, v]) => {
+        const val = typeof v === 'number' ? Math.round(v * 10) / 10 : v
+        return `${META_LABELS[k]} : <b>${val}</b>`
+      })
+      .join('<br>')
+  }
+
+  function renderEvents(events) {
+    const list = document.getElementById('event-list')
+    list.innerHTML = ''
+
+    Object.values(markers).forEach(m => map.removeLayer(m))
+    markers = {}
+
+    events.forEach(ev => {
+      const st = stations[ev.StationId] || {}
+
+      // carte dans la sidebar
+      const card = document.createElement('div')
+      card.className = `event-card ${ev.Type}`
+      const metaHTML = formatMeta(ev.Metadata)
+      card.innerHTML = `
+        <div class="event-type">${TYPE_LABELS[ev.Type] || ev.Type}</div>
+        <div class="event-station">${st.Name || ev.StationId}</div>
+        <div class="event-dates">${formatDateRange(ev.StartedAt, ev.EndedAt)}</div>
+        <span class="event-severity">${ev.Severity}</span>
+        ${metaHTML ? `<div class="event-meta">${metaHTML}</div>` : ''}
+      `
+      card.addEventListener('click', () => {
+        if (st.Latitude && markers[ev.Id]) {
+          map.setView([st.Latitude, st.Longitude], 10)
+          markers[ev.Id].openPopup()
+        }
+      })
+      list.appendChild(card)
+
+      // marqueur sur la carte
+      if (st.Latitude && st.Longitude) {
+        const m = L.marker([st.Latitude, st.Longitude], { icon: markerIcon(ev.Type) })
+          .bindPopup(`
+            <b>${TYPE_LABELS[ev.Type] || ev.Type}</b><br>
+            ${st.Name || ev.StationId}<br>
+            ${formatDateRange(ev.StartedAt, ev.EndedAt)}<br>
+            Sévérité : <b>${ev.Severity}</b><br>
+            ${metaPopup(ev.Metadata)}
+          `)
+          .addTo(map)
+        markers[ev.Id] = m
+      }
+    })
+
+    document.getElementById('status').textContent =
+      `${events.length} événement${events.length > 1 ? 's' : ''} affiché${events.length > 1 ? 's' : ''}`
+  }
+
+  function applyFilter(type) {
+    activeFilter = type
+    const filtered = type ? allEvents.filter(e => e.Type === type) : allEvents
+    renderEvents(filtered)
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.type === type)
+    })
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => applyFilter(btn.dataset.type))
+  })
+
+  async function load() {
+    try {
+      const [eventsRes, stationsRes] = await Promise.all([
+        fetch('/events?limit=100'),
+        fetch('/stations'),
+      ])
+
+      allEvents = await eventsRes.json() || []
+      const stationList = await stationsRes.json() || []
+      stationList.forEach(s => { stations[s.Id] = s })
+
+      applyFilter(activeFilter)
+    } catch (e) {
+      document.getElementById('status').textContent = 'Erreur de chargement'
+      console.error(e)
+    }
+  }
+
+  load()
+</script>
+</body>
+</html>
