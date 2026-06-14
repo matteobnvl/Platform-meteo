@@ -26,5 +26,19 @@ type Event struct {
 	Type      string
 	StartedAt time.Time
 	EndedAt   *time.Time
+	Severity  string
 	Metadata  map[string]any
+}
+
+type EventStat struct {
+	Type    string
+	Country string
+	Count   int
+}
+
+type AggregateResult struct {
+	Period  string  `json:"period"`
+	AvgTemp float64 `json:"avg_temperature"`
+	MaxTemp float64 `json:"max_temperature"`
+	MinTemp float64 `json:"min_temperature"`
 }
