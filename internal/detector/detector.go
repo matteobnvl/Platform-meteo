@@ -2,7 +2,7 @@ package detector
 
 import (
 	"database/sql"
-	"fmt"
+	"log/slog"
 	"os"
 	"sort"
 	"strconv"
@@ -36,28 +36,27 @@ func LoadConfig() Config {
 	}
 }
 
-func Run(database *sql.DB, cfg Config) {
-	go func() {
-		runOnce(database, cfg)
-		ticker := time.NewTicker(time.Duration(cfg.IntervalMinutes) * time.Minute)
-		defer ticker.Stop()
-		for range ticker.C {
-			runOnce(database, cfg)
-		}
-	}()
-}
-
-func runOnce(database *sql.DB, cfg Config) {
-	stations, err := dbpkg.GetStations(database)
+func RunOnce(database *sql.DB, cfg Config) {
+	stations, err := dbpkg.GetStations(database, "")
 	if err != nil {
-		fmt.Printf("détecteur : erreur récupération stations : %v\n", err)
+		slog.Error("détecteur : récupération stations", "err", err)
 		return
 	}
-	total := 0
+
+	results := make(chan int, len(stations))
+
 	for _, st := range stations {
-		total += detectForStation(database, st, cfg)
+		go func(st model.Station) {
+			results <- detectForStation(database, st, cfg)
+		}(st)
 	}
-	fmt.Printf("détection terminée : %d nouveaux événements\n", total)
+
+	total := 0
+	for range stations {
+		total += <-results
+	}
+
+	slog.Info("détection terminée", "nouveaux_événements", total)
 }
 
 func detectForStation(database *sql.DB, station model.Station, cfg Config) int {
@@ -84,7 +83,7 @@ func detectForStation(database *sql.DB, station model.Station, cfg Config) int {
 		e.StationId = station.Id
 		inserted, err := dbpkg.InsertEventIfNew(database, e)
 		if err != nil {
-			fmt.Printf("détecteur : erreur insertion événement %s : %v\n", e.Type, err)
+			slog.Error("détecteur : insertion événement", "type", e.Type, "err", err)
 			continue
 		}
 		if inserted {
@@ -262,7 +261,7 @@ func buildDailyMax(obs []model.Observation) []dayMaxTemp {
 	maxByDay := map[string]float64{}
 	for _, o := range obs {
 		day := o.ObservedAt.UTC().Format("2006-01-02")
-		if o.Temperature > maxByDay[day] {
+		if cur, ok := maxByDay[day]; !ok || o.Temperature > cur {
 			maxByDay[day] = o.Temperature
 		}
 	}

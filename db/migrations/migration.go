@@ -3,6 +3,7 @@ package migrations
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"sort"
@@ -48,7 +49,7 @@ func Run(db *sql.DB) error {
 		}
 
 		db.Exec("INSERT INTO migrations (filename) VALUES ($1)", filename)
-		fmt.Printf("migration appliquée : %s\n", filename)
+		slog.Info("migration appliquée", "fichier", filename)
 	}
 	return nil
 }

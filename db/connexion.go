@@ -2,8 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -12,14 +11,12 @@ import (
 )
 
 func connect() (*sql.DB, error) {
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-	)
+	dsn := "host=" + os.Getenv("DB_HOST") +
+		" port=" + os.Getenv("DB_PORT") +
+		" user=" + os.Getenv("DB_USER") +
+		" password=" + os.Getenv("DB_PASSWORD") +
+		" dbname=" + os.Getenv("DB_NAME") +
+		" sslmode=disable"
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -37,14 +34,15 @@ func InitDB(runMigrations bool) *sql.DB {
 
 	db, err := connect()
 	if err != nil {
-		log.Fatalf("connexion BDD : %v", err)
-	} else {
-		fmt.Println("Connexion database successful")
+		slog.Error("connexion BDD", "err", err)
+		os.Exit(1)
 	}
+	slog.Info("connexion BDD établie")
 
 	if runMigrations {
 		if err := migrations.Run(db); err != nil {
-			log.Fatalf("migrations : %v", err)
+			slog.Error("migrations", "err", err)
+			os.Exit(1)
 		}
 	}
 

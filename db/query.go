@@ -8,8 +8,14 @@ import (
 	"github.com/matteobnvl/Platform-meteo/internal/model"
 )
 
-func GetStations(db *sql.DB) ([]model.Station, error) {
-	rows, err := db.Query(`SELECT id, name, latitude, longitude FROM stations`)
+func GetStations(db *sql.DB, country string) ([]model.Station, error) {
+	query := `SELECT id, name, country, latitude, longitude FROM stations`
+	args := []any{}
+	if country != "" {
+		query += ` WHERE country = $1`
+		args = append(args, country)
+	}
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +23,7 @@ func GetStations(db *sql.DB) ([]model.Station, error) {
 	var stations []model.Station
 	for rows.Next() {
 		var s model.Station
-		if err := rows.Scan(&s.Id, &s.Name, &s.Latitude, &s.Longitude); err != nil {
+		if err := rows.Scan(&s.Id, &s.Name, &s.Country, &s.Latitude, &s.Longitude); err != nil {
 			return nil, err
 		}
 		stations = append(stations, s)
@@ -27,8 +33,8 @@ func GetStations(db *sql.DB) ([]model.Station, error) {
 
 func GetStationByID(db *sql.DB, id string) (model.Station, error) {
 	var s model.Station
-	err := db.QueryRow(`SELECT id, name, latitude, longitude FROM stations WHERE id=$1`, id).
-		Scan(&s.Id, &s.Name, &s.Latitude, &s.Longitude)
+	err := db.QueryRow(`SELECT id, name, country, latitude, longitude FROM stations WHERE id=$1`, id).
+		Scan(&s.Id, &s.Name, &s.Country, &s.Latitude, &s.Longitude)
 	return s, err
 }
 
@@ -71,17 +77,17 @@ func GetObservationsByStation(db *sql.DB, stationID string, from, to *time.Time,
 }
 func InsertStation(db *sql.DB, s model.Station) error {
 	_, err := db.Exec(`
-        INSERT INTO stations (id, name, latitude, longitude)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO stations (id, name, country, latitude, longitude)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO NOTHING
-    `, s.Id, s.Name, s.Latitude, s.Longitude)
+    `, s.Id, s.Name, s.Country, s.Latitude, s.Longitude)
 	return err
 }
 
 func UpdateStation(db *sql.DB, s model.Station) error {
 	_, err := db.Exec(`
-        UPDATE stations SET name=$2, latitude=$3, longitude=$4 WHERE id=$1
-    `, s.Id, s.Name, s.Latitude, s.Longitude)
+        UPDATE stations SET name=$2, country=$3, latitude=$4, longitude=$5 WHERE id=$1
+    `, s.Id, s.Name, s.Country, s.Latitude, s.Longitude)
 	return err
 }
 

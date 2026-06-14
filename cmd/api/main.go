@@ -1,31 +1,46 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/matteobnvl/Platform-meteo/db"
+	"github.com/matteobnvl/Platform-meteo/internal/handler"
 )
 
 func main() {
 	database := db.InitDB(false)
 	defer database.Close()
 
-	app := &App{db: database}
+	app := &handler.App{DB: database}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "ok")
-	})
-	mux.HandleFunc("GET /stations", app.listStations)
-	mux.HandleFunc("GET /stations/{id}", app.getStation)
-	mux.HandleFunc("GET /stations/{id}/observations", app.listObservations)
-	mux.HandleFunc("POST /stations", app.createStation)
-	mux.HandleFunc("PUT /stations/{id}", app.updateStation)
-	mux.HandleFunc("DELETE /stations/{id}", app.deleteStation)
-	mux.HandleFunc("GET /observations/aggregate", app.aggregateObservations)
 
-	fmt.Println("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok\n"))
+	})
+
+	// stations
+	mux.HandleFunc("GET /stations", app.ListStations)
+	mux.HandleFunc("POST /stations", app.CreateStation)
+	mux.HandleFunc("GET /stations/{id}", app.GetStation)
+	mux.HandleFunc("PUT /stations/{id}", app.UpdateStation)
+	mux.HandleFunc("DELETE /stations/{id}", app.DeleteStation)
+
+	// observations
+	mux.HandleFunc("GET /stations/{id}/observations", app.ListObservations)
+	mux.HandleFunc("GET /observations/aggregate", app.AggregateObservations)
+
+	// events
+	mux.HandleFunc("GET /events", app.ListEvents)
+	mux.HandleFunc("GET /events/stats", app.EventStats)
+	mux.HandleFunc("GET /events/{id}", app.GetEvent)
+	mux.HandleFunc("GET /stations/{id}/events", app.ListStationEvents)
+
+	slog.Info("serveur démarré", "port", 8080)
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		slog.Error("serveur arrêté", "err", err)
+		os.Exit(1)
+	}
 }

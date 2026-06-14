@@ -6,7 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -28,16 +28,20 @@ func FetchSynop(db *sql.DB) {
 		time.Now().Year(),
 	)
 
-	resp := fetch(url)
-	defer resp.Body.Close()
+	start := time.Now()
+	slog.Info("ingestion démarrée", "url", url)
 
-	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("Statut HTTP invalide: %d", resp.StatusCode)
+	resp, err := fetch(url)
+	if err != nil {
+		slog.Error("téléchargement échoué", "err", err)
+		return
 	}
+	defer resp.Body.Close()
 
 	gzReader, err := gzip.NewReader(resp.Body)
 	if err != nil {
-		log.Fatalf("Erreur décompression gzip: %v", err)
+		slog.Error("décompression gzip échouée", "err", err)
+		return
 	}
 	defer gzReader.Close()
 
@@ -45,18 +49,15 @@ func FetchSynop(db *sql.DB) {
 	csvReader.Comma = ';'
 	csvReader.LazyQuotes = true
 
-	// lecture du header
 	header, err := csvReader.Read()
 	if err != nil {
-		log.Fatalf("Erreur lecture header: %v", err)
+		slog.Error("lecture header CSV échouée", "err", err)
+		return
 	}
 
-	// stock les bases connues pour pas dupliquer l'insertion des bases
 	knownStations := make(map[string]bool)
-
 	var batch []model.Observation
-
-	log.Println("début de l'importation des données...")
+	calls, errors := 0, 0
 
 	for {
 		row, err := csvReader.Read()
@@ -64,15 +65,15 @@ func FetchSynop(db *sql.DB) {
 			break
 		}
 		if err != nil {
-			log.Printf("erreur de lecture d'une ligne: %v", err)
+			slog.Warn("ligne ignorée", "err", err)
+			errors++
 			continue
 		}
+		calls++
 
-		// mapping
 		st := mapping.MapSynopStation(header, row)
 		obs := mapping.MapSynopObservation(header, row)
 
-		// si pas de stations, on insert
 		if !knownStations[st.Id] {
 			storage.InsertStation(db, *st)
 			knownStations[st.Id] = true
@@ -81,31 +82,34 @@ func FetchSynop(db *sql.DB) {
 		batch = append(batch, *obs)
 
 		if len(batch) >= batchSize {
-			err := storage.InsertBatch(db, batch)
-			if err != nil {
-				log.Printf("Erreur lors de l'insertion du batch: %v", err)
+			if err := storage.InsertBatch(db, batch); err != nil {
+				slog.Error("insertion batch échouée", "err", err)
+				errors++
 			}
 			batch = batch[:0]
 		}
 	}
 
-	// insertions des dernières observations
 	if len(batch) > 0 {
 		_ = storage.InsertBatch(db, batch)
 	}
 
-	log.Println("Importation terminée avec succès !")
+	slog.Info("ingestion terminée",
+		"lignes_traitées", calls,
+		"erreurs", errors,
+		"durée", time.Since(start).Round(time.Millisecond),
+	)
 }
 
-func fetch(url string) *http.Response {
+func fetch(url string) (*http.Response, error) {
 	client := &http.Client{Timeout: 50 * time.Second}
 	resp, err := client.Get(url)
-
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.Fatalf("statut %d", resp.StatusCode)
+		resp.Body.Close()
+		return nil, fmt.Errorf("statut HTTP inattendu: %d", resp.StatusCode)
 	}
-	return resp
+	return resp, nil
 }
