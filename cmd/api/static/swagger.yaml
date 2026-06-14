@@ -1,0 +1,414 @@
+openapi: 3.0.3
+info:
+  title: Platform Météo
+  description: API REST de la plateforme météo — données SYNOP Météo-France, événements sensibles.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Stations
+  - name: Observations
+  - name: Événements
+
+paths:
+
+  /health:
+    get:
+      summary: Vérification de santé
+      responses:
+        "200":
+          description: Serveur opérationnel
+
+  /stations:
+    get:
+      summary: Liste des stations
+      tags: [Stations]
+      parameters:
+        - name: country
+          in: query
+          description: Filtre par code pays (ex. FR)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Station"
+        "500":
+          $ref: "#/components/responses/Error"
+
+    post:
+      summary: Créer une station
+      tags: [Stations]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Station"
+      responses:
+        "201":
+          description: Station créée
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Station"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /stations/{id}:
+    get:
+      summary: Détail d'une station
+      tags: [Stations]
+      parameters:
+        - $ref: "#/components/parameters/StationId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Station"
+        "404":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+    put:
+      summary: Mettre à jour une station
+      tags: [Stations]
+      parameters:
+        - $ref: "#/components/parameters/StationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Station"
+      responses:
+        "200":
+          description: Station mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Station"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+    delete:
+      summary: Supprimer une station
+      tags: [Stations]
+      parameters:
+        - $ref: "#/components/parameters/StationId"
+      responses:
+        "204":
+          description: Supprimée
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /stations/{id}/observations:
+    get:
+      summary: Observations d'une station
+      tags: [Observations]
+      parameters:
+        - $ref: "#/components/parameters/StationId"
+        - name: from
+          in: query
+          description: Date de début (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          description: Date de fin (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Observation"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /stations/{id}/events:
+    get:
+      summary: Événements d'une station
+      tags: [Événements]
+      parameters:
+        - $ref: "#/components/parameters/StationId"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /observations/aggregate:
+    get:
+      summary: Agrégation journalière des températures
+      tags: [Observations]
+      parameters:
+        - name: period
+          in: query
+          required: true
+          description: Seul "daily" est supporté
+          schema:
+            type: string
+            enum: [daily]
+        - name: station_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AggregateResult"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /events:
+    get:
+      summary: Liste des événements météo
+      tags: [Événements]
+      parameters:
+        - name: type
+          in: query
+          description: "Type d'événement : storm, heatwave, cold_wave, flood"
+          schema:
+            type: string
+            enum: [storm, heatwave, cold_wave, flood]
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "400":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /events/stats:
+    get:
+      summary: Comptage agrégé des événements
+      tags: [Événements]
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: country
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventStat"
+        "500":
+          $ref: "#/components/responses/Error"
+
+  /events/{id}:
+    get:
+      summary: Détail d'un événement
+      tags: [Événements]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "500":
+          $ref: "#/components/responses/Error"
+
+components:
+
+  parameters:
+    StationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    Error:
+      description: Erreur
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+
+    Station:
+      type: object
+      properties:
+        Id:
+          type: string
+          example: "07149"
+        Name:
+          type: string
+          example: "Paris-Montsouris"
+        Country:
+          type: string
+          example: "FR"
+        Latitude:
+          type: number
+          example: 48.8
+        Longitude:
+          type: number
+          example: 2.3
+
+    Observation:
+      type: object
+      properties:
+        Id:
+          type: integer
+        StationId:
+          type: string
+        ObservedAt:
+          type: string
+          format: date-time
+        Temperature:
+          type: number
+          description: En °C
+        WindSpeed:
+          type: number
+          description: En km/h
+        WindDirection:
+          type: number
+          description: En degrés
+        Precipitation:
+          type: number
+          description: En mm
+
+    Event:
+      type: object
+      properties:
+        Id:
+          type: integer
+        StationId:
+          type: string
+        Type:
+          type: string
+          enum: [storm, heatwave, cold_wave, flood]
+        StartedAt:
+          type: string
+          format: date-time
+        EndedAt:
+          type: string
+          format: date-time
+          nullable: true
+        Severity:
+          type: string
+          enum: [medium, high, extreme]
+        Metadata:
+          type: object
+          additionalProperties: true
+
+    AggregateResult:
+      type: object
+      properties:
+        period:
+          type: string
+          example: "2026-01-15"
+        avg_temperature:
+          type: number
+        max_temperature:
+          type: number
+        min_temperature:
+          type: number
+
+    EventStat:
+      type: object
+      properties:
+        Type:
+          type: string
+        Country:
+          type: string
+        Count:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "station \"07999\" introuvable"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"log/slog"
 	"net/http"
 	"os"
@@ -8,6 +9,12 @@ import (
 	"github.com/matteobnvl/Platform-meteo/db"
 	"github.com/matteobnvl/Platform-meteo/internal/handler"
 )
+
+//go:embed static/swagger.yaml
+var swaggerYAML []byte
+
+//go:embed static/swagger.html
+var swaggerHTML []byte
 
 func main() {
 	database := db.InitDB(false)
@@ -19,6 +26,16 @@ func main() {
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok\n"))
+	})
+
+	// docs
+	mux.HandleFunc("GET /docs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(swaggerHTML)
+	})
+	mux.HandleFunc("GET /docs/swagger.yaml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/yaml")
+		w.Write(swaggerYAML)
 	})
 
 	// stations
