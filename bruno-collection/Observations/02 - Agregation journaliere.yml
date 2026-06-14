@@ -1,0 +1,24 @@
+info:
+  name: Agregation journaliere
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "http://localhost:8080/observations/aggregate"
+  auth: inherit
+  params:
+    - name: period
+      value: daily
+      enabled: true
+      type: query
+    - name: station_id
+      value: "07149"
+      enabled: true
+      type: query
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

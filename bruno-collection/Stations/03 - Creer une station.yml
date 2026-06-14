@@ -1,0 +1,25 @@
+info:
+  name: Creer une station
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "http://localhost:8080/stations"
+  auth: inherit
+  body:
+    type: json
+    content: |-
+      {
+        "Id": "99999",
+        "Name": "Station Test",
+        "Country": "FR",
+        "Latitude": 48.85,
+        "Longitude": 2.35
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

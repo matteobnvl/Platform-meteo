@@ -1,0 +1,25 @@
+info:
+  name: Modifier une station
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: "http://localhost:8080/stations/99999"
+  auth: inherit
+  body:
+    type: json
+    content: |-
+      {
+        "Id": "99999",
+        "Name": "Station Test Modifiee",
+        "Country": "FR",
+        "Latitude": 48.90,
+        "Longitude": 2.40
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
