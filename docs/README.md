@@ -12,6 +12,8 @@ Bienvenue dans le dossier de documentation du projet. Vous trouverez ici des gui
    Ce guide présente le fonctionnement du moteur de migration Go personnalisé, comment sont ordonnées et jouées les migrations, ainsi que la procédure pour créer une nouvelle migration.
 4. **[Schéma et Modèle de la Base de Données](./database.md)**
    Ce guide présente en détail le schéma PostgreSQL (diagramme de base de données, tables, clés, contraintes d'unicité et indexation) ainsi que sa correspondance exacte avec les modèles Go (`structs`).
+5. **[Détecteur d'Événements Météorologiques](./detector.md)**
+   Ce guide explique le fonctionnement du moteur de détection automatique d'événements (tempêtes, canicules, vagues de froid, inondations) : configuration des seuils, algorithmes de détection, déduplication et endpoints API associés.
 
 
 
